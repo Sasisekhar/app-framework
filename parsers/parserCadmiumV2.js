@@ -17,7 +17,7 @@ import MaUtil from './ma-util.js'
 /**
  * A parser component to process the common results format
  */
-export default class ParserOGSE extends Parser { 
+export default class ParserCadmiumV2 extends Parser { 
 	
 	/**                              
 	 * Detects the parser to use. 
@@ -107,7 +107,7 @@ export default class ParserOGSE extends Parser {
 		var cell = grid.get_cell(xyz[0], xyz[1], xyz[2] ?? 0);
 		
 		// +v === +v is true when v is a number. It's supposedly faster and safer than isNaN
-		var values = data[4].split(",").map(v => +v === +v ? +v : v);
+		var values = data[4].slice(1,-1).split(",").map(v => +v === +v ? +v : v);
 
 		frame.add_state_message(new MessageState(cell, values));
 	}
