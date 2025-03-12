@@ -85,6 +85,7 @@ export default class Parser extends Evented {
 	
 	async parse_csv(simulation, get_time, parse_line) {
 		var f = null;
+		var delimiter_set = false;
 		
 		return Reader.read_by_chunk(this.files.log, "\n", (parsed, chunk, progress) => {
 			if (parsed == null) parsed = [];
@@ -92,10 +93,26 @@ export default class Parser extends Evented {
 			// If line has only one item, then it's a timestep. Otherwise, it's a simulation message, 
 			// the format then depends on the whether it's a DEVS, Cell-DEVS or Irregular model
 			var lines = chunk.split("\n");
-			var start = f == null ? 1 : 0;
+
+			// Check if the first line contains "sep="
+			var hasSepLine = lines[0].trim().toLowerCase().startsWith("sep=");
+
+			var start = 0;
+			if(f == null) { // Decide how many lines to skip for header, sep= etc.
+				if(hasSepLine) {
+					start = 2;
+				} else {
+					start = 1;
+				}
+			}
+
+			var delimiter = ";";
+			if(!delimiter_set && hasSepLine) { //change delimiter based on sep
+				delimiter = lines[0].trim().substring(4);
+			}
 			
 			for (var i = start; i < lines.length; i++) {
-				var d = lines[i].split(";");
+				var d = lines[i].split(delimiter);
 				
 				if (f?.time == d[0]) parse_line(f, simulation, d);
 				
